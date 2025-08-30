@@ -13,7 +13,6 @@ Helm v3 for package management
 
 1. Build and Push Docker Image
 Navigate to the application directory and build the container image:
-bashcd app/
 
 # Build the Flask application image
 docker build -t flask-eks-app:latest .
@@ -127,16 +126,13 @@ helm install grafana grafana/grafana \
 FLASK_URL=$(kubectl get service flask-service -n flask-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 echo "Flask Application URL: http://$FLASK_URL"
 
-# Test service health endpoint
+# Test endpoint
 curl -s http://$FLASK_URL/serviceup | jq
 
-# Test user data retrieval (path parameter)
 curl -s http://$FLASK_URL/user/1 | jq
 
-# Test user data retrieval (query parameter)
 curl -s http://$FLASK_URL/user?id=1 | jq
 
-# Test error handling with non-existent user
 curl -s http://$FLASK_URL/user/999 | jq
 
 
@@ -162,5 +158,6 @@ Import Dashboard:
 Copy the dashboard JSON from grafana/dashboard.json
 
 after this step you will able to see dashboar
+
 
 
