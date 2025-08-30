@@ -1,0 +1,121 @@
+adminPassword: admin123
+
+persistence:
+  enabled: true
+  size: 10Gi
+
+service:
+  type: LoadBalancer
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki:3100
+      isDefault: true
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    flask-app-dashboard:
+      json: |
+        {
+          "id": null,
+          "title": "Flask App Dashboard",
+          "tags": ["flask"],
+          "timezone": "browser",
+          "panels": [
+            {
+              "id": 1,
+              "title": "Requests per Endpoint",
+              "type": "stat",
+              "targets": [
+                {
+                  "expr": "sum(rate({namespace=\"flask-app\", app=\"flask-app\"} | json | status_code >= 200 [5m])) by (path)",
+                  "refId": "A"
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  }
+                }
+              },
+              "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+            },
+            {
+              "id": 2,
+              "title": "Success vs Error Counts",
+              "type": "stat",
+              "targets": [
+                {
+                  "expr": "sum(rate({namespace=\"flask-app\", app=\"flask-app\"} | json | status_code >= 200 and status_code < 300 [5m]))",
+                  "refId": "A",
+                  "legendFormat": "2xx Success"
+                },
+                {
+                  "expr": "sum(rate({namespace=\"flask-app\", app=\"flask-app\"} | json | status_code >= 400 and status_code < 500 [5m]))",
+                  "refId": "B",
+                  "legendFormat": "4xx Client Error"
+                },
+                {
+                  "expr": "sum(rate({namespace=\"flask-app\", app=\"flask-app\"} | json | status_code >= 500 [5m]))",
+                  "refId": "C",
+                  "legendFormat": "5xx Server Error"
+                }
+              ],
+              "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+            },
+            {
+              "id": 3,
+              "title": "Recent Log Stream",
+              "type": "logs",
+              "targets": [
+                {
+                  "expr": "{namespace=\"flask-app\", app=\"flask-app\"}",
+                  "refId": "A"
+                }
+              ],
+              "gridPos": {"h": 10, "w": 24, "x": 0, "y": 8}
+            },
+            {
+              "id": 4,
+              "title": "Average Latency per Endpoint",
+              "type": "stat",
+              "targets": [
+                {
+                  "expr": "avg(rate({namespace=\"flask-app\", app=\"flask-app\"} | json | unwrap duration_ms [5m])) by (path)",
+                  "refId": "A"
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ms"
+                }
+              },
+              "gridPos": {"h": 8, "w": 24, "x": 0, "y": 18}
+            }
+          ],
+          "time": {
+            "from": "now-1h",
+            "to": "now"
+          },
+          "refresh": "5s"
+        }
+
