@@ -14,13 +14,13 @@ Helm v3 for package management
 1. Build and Push Docker Image
 Navigate to the application directory and build the container image:
 
-# Build the Flask application image
+ Build the Flask application image
 docker build -t flask-eks-app:latest .
 
-# Authenticate with Docker Hub
+ Authenticate with Docker Hub
 docker login
 
-# Tag image with your Docker Hub username
+ Tag image with your Docker Hub username
 docker tag flask-eks-app:latest masiam/flask-eks-app:latest
 
 
@@ -38,7 +38,7 @@ eksctl create cluster \
   --nodes-max 4 \
   --managed
 
-# Configure kubectl to use the new cluster
+ Configure kubectl to use the new cluster
 aws eks update-kubeconfig --region us-west-2 --name flask-monitoring-cluster
 
 3. Install Required EKS Add-ons
@@ -53,7 +53,7 @@ eksctl create iamserviceaccount \
   --attach-policy-arn arn:aws:iam::aws:policy/service-role/Amazon_EBS_CSI_DriverPolicy \
   --approve
 
-# Install EBS CSI driver add-on
+Install EBS CSI driver add-on
 aws eks create-addon \
   --cluster-name flask-monitoring-cluster \
   --addon-name aws-ebs-csi-driver \
@@ -71,7 +71,7 @@ aws iam create-policy \
     --policy-name AWSLoadBalancerControllerIAMPolicy \
     --policy-document file://iam_policy.json
 
-# Create service account with IAM role
+- Create service account with IAM role
 eksctl create iamserviceaccount \
   --cluster=flask-monitoring-cluster \
   --namespace=kube-system \
@@ -80,7 +80,7 @@ eksctl create iamserviceaccount \
   --attach-policy-arn=arn:aws:iam::${AWS_ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy \
   --approve
 
-# Install AWS Load Balancer Controller via Helm
+- Install AWS Load Balancer Controller via Helm
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 
@@ -109,7 +109,7 @@ kubectl apply -f k8s/ingress.yaml
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
-# Install Loki stack for log collection
+- Install Loki stack for log collection
 helm install loki grafana/loki-stack \
   --namespace=monitoring \
   --create-namespace \
@@ -126,7 +126,7 @@ helm install grafana grafana/grafana \
 FLASK_URL=$(kubectl get service flask-service -n flask-app -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 echo "Flask Application URL: http://$FLASK_URL"
 
-# Test endpoint
+- Test endpoint
 curl -s http://$FLASK_URL/serviceup | jq
 
 curl -s http://$FLASK_URL/user/1 | jq
@@ -141,7 +141,7 @@ Set up port forwarding and access the monitoring interface:
 open it via node port http://workernode:node port in 30k range
 
 
-# Retrieve Grafana admin credentials
+- Retrieve Grafana admin credentials
  "Username: admin"
   pasword: .....
 
@@ -157,7 +157,10 @@ Click "Save & Test"
 Import Dashboard:
 Copy the dashboard JSON from grafana/dashboard.json
 
-after this step you will able to see dashboar
+after this step you will able to see dashboard 
+
+Thank you........
+
 
 
 
